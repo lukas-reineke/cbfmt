@@ -18,7 +18,7 @@ async fn main() {
 
     let mut app =
         App::new("cbfmt")
-            .version("0.1.0")
+            .version("0.1.1")
             .author("Lukas Reineke <lukas@reineke.jp>")
             .about("A tool to format codeblocks inside markdown and org documents.\nIt iterates over all codeblocks, and formats them with the tool(s) specified for the language of the block.")
             .arg(
@@ -59,7 +59,7 @@ async fn main() {
                     .short('p')
                     .long("parser")
                     .value_name("markdown|org")
-                    .help("Sets the parser to use. Required for Stdin.")
+                    .help("Sets the parser to use.")
                     .takes_value(true),
             )
             .arg(
