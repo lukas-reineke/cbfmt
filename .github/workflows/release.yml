@@ -58,11 +58,18 @@ jobs:
         if: matrix.rust == 'nightly-x86_64-gnu'
         shell: bash
 
+      - name: Install musl-gcc for x86_64-musl
+        run: |
+          sudo apt install musl-tools
+          sudo ln -s /bin/g++ /bin/musl-g++
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        shell: bash
+
       - name: Build release binaries
         uses: actions-rs/cargo@v1
         with:
           command: build
-          args: --release
+          args: --release --target ${{ matrix.target }}
 
       - name: Build archive
         shell: bash
@@ -73,11 +80,11 @@ jobs:
           cp {README.md,LICENSE.md} "$staging/"
 
           if [ "${{ matrix.os }}" = "windows-latest" ]; then
-            cp target/release/cbfmt.exe "$staging/"
+            cp target/${{ matrix.target }}/release/cbfmt.exe "$staging/"
             7z a "$staging.zip" "$staging"
             echo "ASSET=$staging.zip" >> $GITHUB_ENV
           else
-            cp target/release/cbfmt "$staging/"
+            cp target/${{ matrix.target }}/release/cbfmt "$staging/"
             tar czf "$staging.tar.gz" "$staging"
             echo "ASSET=$staging.tar.gz" >> $GITHUB_ENV
           fi
