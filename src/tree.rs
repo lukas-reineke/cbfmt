@@ -14,6 +14,11 @@ pub fn get_tree(parser_lang: &str, text: &[u8]) -> Option<tree_sitter::Tree> {
                 .set_language(tree_sitter_org::language())
                 .expect("Could not load org grammar");
         }
+        "restructuredtext" => {
+            parser
+                .set_language(tree_sitter_rst::language())
+                .expect("Could not load restructuredtext grammar");
+        }
         _ => {
             return None;
         }
@@ -48,6 +53,20 @@ pub fn get_query(parser_lang: &str) -> Option<tree_sitter::Query> {
             )
             .expect("Could not load org query"),
         ),
+        "restructuredtext" => Some(
+            tree_sitter::Query::new(
+                tree_sitter_rst::language(),
+                r#"
+                    (directive
+                        name: (type) @_name
+                        (#match? @_name "code")
+                        body: (body
+                            (arguments) @language
+                            (content) @content)) @codeblock
+                "#,
+            )
+            .expect("Could not load restructuredtext query"),
+        ),
         _ => None,
     }
 }
@@ -59,6 +78,9 @@ pub fn get_parser_lang_from_filename(filename: &str) -> Option<&str> {
     }
     if filename.ends_with(".org") {
         return Some("org");
+    }
+    if filename.ends_with(".rst") {
+        return Some("restructuredtext");
     }
     None
 }
