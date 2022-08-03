@@ -161,9 +161,17 @@ async fn run(
             end: 0,
             input_hash: 0,
         };
+
         for capture in each_match.captures.iter() {
-            let range = capture.node.range();
+            let mut range = capture.node.range();
+
+            for predicate in query.general_predicates(each_match.pattern_index) {
+                range = tree::handle_directive(&predicate.operator, &range, &predicate.args)
+                    .unwrap_or(range);
+            }
+
             let capture_name = &query.capture_names()[capture.index as usize];
+
             if capture_name == "language" {
                 ctx.language = String::from(&src[range.start_byte..range.end_byte]);
             }
@@ -176,11 +184,6 @@ async fn run(
                 // buffer
                 if parser == "markdown" && &src[(end_byte - 3)..end_byte] == "```" {
                     end_byte -= 3
-                }
-
-                // Workaround for rst last index
-                if parser == "restructuredtext" {
-                    ctx.end += 1;
                 }
 
                 content = String::from(dedent(&src[range.start_byte..end_byte]));

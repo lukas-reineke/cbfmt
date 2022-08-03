@@ -62,7 +62,9 @@ pub fn get_query(parser_lang: &str) -> Option<tree_sitter::Query> {
                         (#match? @_name "code")
                         body: (body
                             (arguments) @language
-                            (content) @content)) @codeblock
+                            (content) @content
+                            (#offset! @content 0 0 1 0))) @codeblock
+                    
                 "#,
             )
             .expect("Could not load restructuredtext query"),
@@ -81,6 +83,42 @@ pub fn get_parser_lang_from_filename(filename: &str) -> Option<&str> {
     }
     if filename.ends_with(".rst") {
         return Some("restructuredtext");
+    }
+    None
+}
+
+pub fn handle_directive(
+    directive: &str,
+    range: &tree_sitter::Range,
+    args: &Vec<tree_sitter::QueryPredicateArg>,
+) -> Option<tree_sitter::Range> {
+    match directive {
+        "offset!" => {
+            let start_row_offset = match &args[1] {
+                tree_sitter::QueryPredicateArg::String(value) => value.parse::<usize>().unwrap(),
+                _ => panic!("Unexpected argument type for offset!"),
+            };
+            let start_col_offset = match &args[2] {
+                tree_sitter::QueryPredicateArg::String(value) => value.parse::<usize>().unwrap(),
+                _ => panic!("Unexpected argument type for offset!"),
+            };
+            let end_row_offset = match &args[3] {
+                tree_sitter::QueryPredicateArg::String(value) => value.parse::<usize>().unwrap(),
+                _ => panic!("Unexpected argument type for offset!"),
+            };
+            let end_col_offset = match &args[4] {
+                tree_sitter::QueryPredicateArg::String(value) => value.parse::<usize>().unwrap(),
+                _ => panic!("Unexpected argument type for offset!"),
+            };
+
+            let mut new_range = range.clone();
+            new_range.start_point.row = range.start_point.row + start_row_offset;
+            new_range.start_point.column = range.start_point.column + start_col_offset;
+            new_range.end_point.row = range.end_point.row + end_row_offset;
+            new_range.end_point.column = range.end_point.column + end_col_offset;
+            return Some(new_range);
+        }
+        &_ => {}
     }
     None
 }
