@@ -26,22 +26,27 @@ jobs:
             os: ubuntu-latest
             rust: nightly
             target: x86_64-unknown-linux-gnu
+            build_command: build
           - build: linux-x86_64-musl
             os: ubuntu-latest
             rust: nightly
             target: x86_64-unknown-linux-musl
+            build_command: zigbuild
           - build: macos-x86_64
             os: macos-latest
             rust: nightly
             target: x86_64-apple-darwin
+            build_command: build
           - build: windows-x86_64-gnu
             os: windows-latest
             rust: nightly-x86_64-gnu
             target: x86_64-pc-windows-gnu
+            build_command: build
           - build: windows-x86_64-msvc
             os: windows-latest
             rust: nightly-x86_64-msvc
             target: x86_64-pc-windows-msvc
+            build_command: build
     runs-on: ${{ matrix.os }}
     steps:
       - uses: actions/checkout@v3
@@ -58,17 +63,18 @@ jobs:
         if: matrix.rust == 'nightly-x86_64-gnu'
         shell: bash
 
-      - name: Install musl-gcc for x86_64-musl
+      - name: Install dependencies for x86_64-musl
         run: |
-          sudo apt install musl-tools
-          sudo ln -s /bin/g++ /bin/musl-g++
+          sudo apt install musl-tools python3-pip
+          sudo pip3 install ziglang
+          cargo install cargo-zigbuild
         if: matrix.target == 'x86_64-unknown-linux-musl'
         shell: bash
 
       - name: Build release binaries
         uses: actions-rs/cargo@v1
         with:
-          command: build
+          command: ${{ matrix.build_command }}
           args: --release --target ${{ matrix.target }}
 
       - name: Build archive
