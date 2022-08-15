@@ -191,7 +191,7 @@ async fn run(
         let formatter = formatter.iter().map(|f| f.to_owned()).collect();
 
         ctx.input_hash = utils::get_hash(&content);
-        futures.push(tokio::spawn(async move {
+        futures.push_back(tokio::spawn(async move {
             format(ctx, formatter, &content).await
         }));
     }
