@@ -10,7 +10,7 @@ the language of the block.
 
 Download the latest release binaries from [github.com/lukas-reineke/cbfmt/releases](https://github.com/lukas-reineke/cbfmt/releases)
 
-### Cargo [Coming Soon]
+### Cargo
 
 ```bash
 cargo install cbfmt
