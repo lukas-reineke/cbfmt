@@ -2,6 +2,7 @@ use super::config::Conf;
 use super::tree;
 use super::utils;
 use futures::{stream::FuturesOrdered, StreamExt};
+use std::char;
 use std::fmt;
 use std::io::{self, prelude::*, Error, ErrorKind, Write};
 use std::process::{Command, Stdio};
@@ -258,6 +259,24 @@ async fn run(
     FormatResult::Unchanged(output)
 }
 
+#[derive(Debug, PartialEq)]
+struct ParsedCommand<'a> {
+    cmd: &'a str,
+    args: Vec<&'a str>,
+}
+
+fn parse_command<'a>(raw_command: &'a str) -> Result<ParsedCommand<'a>, &str> {
+    let mut parsed_components = raw_command.split(char::is_whitespace);
+    let cmd = parsed_components.next().ok_or("No command found.")?;
+    if cmd.is_empty() {
+        return Err("No command provided.");
+    }
+    Ok(ParsedCommand {
+        cmd,
+        args: parsed_components.collect(),
+    })
+}
+
 async fn format(
     ctx: FormatCtx,
     formatter: Vec<String>,
@@ -268,31 +287,39 @@ async fn format(
     let start = Some(format!(":{}", ctx.start));
 
     for f in formatter.iter() {
-        if f.is_empty() {
-            continue;
-        }
-        let f: Vec<_> = f.split_whitespace().collect();
-        let command = f[0];
-        result = match format_single(f, &result) {
-            Err(e) => {
+        match parse_command(f) {
+            Ok(parsed_command) => {
+                result = match format_single(&parsed_command, &result) {
+                    Err(e) => {
+                        return Err(FormatError {
+                            msg: e.to_string(),
+                            filename: None,
+                            command: Some(parsed_command.cmd.to_string()),
+                            language,
+                            start,
+                        });
+                    }
+                    Ok(o) => o,
+                }
+            }
+            Err(msg) => {
                 return Err(FormatError {
-                    msg: e.to_string(),
+                    msg: msg.to_owned(),
                     filename: None,
-                    command: Some(command.to_string()),
+                    command: None,
                     language,
                     start,
-                });
+                })
             }
-            Ok(o) => o,
         }
     }
 
     Ok((ctx, result))
 }
 
-fn format_single(formatter: Vec<&str>, input: &str) -> Result<String, Error> {
-    let mut child = Command::new(formatter[0])
-        .args(&formatter[1..])
+fn format_single(formatter: &ParsedCommand, input: &str) -> Result<String, Error> {
+    let mut child = Command::new(formatter.cmd)
+        .args(&formatter.args)
         .stdin(Stdio::piped())
         .stderr(Stdio::piped())
         .stdout(Stdio::piped())
@@ -315,5 +342,27 @@ fn format_single(formatter: Vec<&str>, input: &str) -> Result<String, Error> {
             ErrorKind::Other,
             String::from_utf8(output.stderr).unwrap(),
         ))
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_parse_empty_command() {
+        assert_eq!(Err("No command provided."), parse_command(""));
+        assert_eq!(Err("No command provided."), parse_command("      "));
+    }
+
+    #[test]
+    fn test_parse_whitespace_args() {
+        assert_eq!(
+            Ok(ParsedCommand {
+                cmd: "shellharden",
+                args: vec!["--transform", ""]
+            }),
+            parse_command("shellharden --transform ")
+        );
     }
 }
