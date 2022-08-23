@@ -1,6 +1,6 @@
 [package]
 name = "cbfmt"
-version = "0.1.3"
+version = "0.1.4"
 edition = "2021"
 description = "A tool to format codeblocks inside markdown and org documents"
 repository = "https://github.com/lukas-reineke/cbfmt"

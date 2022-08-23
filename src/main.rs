@@ -18,7 +18,7 @@ async fn main() {
 
     let mut app =
         App::new("cbfmt")
-            .version("0.1.1")
+            .version("0.1.4")
             .author("Lukas Reineke <lukas@reineke.jp>")
             .about("A tool to format codeblocks inside markdown and org documents.\nIt iterates over all codeblocks, and formats them with the tool(s) specified for the language of the block.")
             .arg(
