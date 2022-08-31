@@ -1,8 +1,8 @@
 [package]
 name = "cbfmt"
-version = "0.1.4"
+version = "0.2.0"
 edition = "2021"
-description = "A tool to format codeblocks inside markdown and org documents"
+description = "A tool to format codeblocks inside markdown, org, and restructuredtext documents"
 repository = "https://github.com/lukas-reineke/cbfmt"
 categories = ["development-tools"]
 keywords = ["format", "markdown", "org", "codeblock"]

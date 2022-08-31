@@ -1,6 +1,6 @@
 # cbfmt (codeblock format)
 
-A tool to format codeblocks inside markdown and org documents.  
+A tool to format codeblocks inside markdown, org, and restructuredtext documents.  
 It iterates over all codeblocks, and formats them with the tool(s) specified for
 the language of the block.
 

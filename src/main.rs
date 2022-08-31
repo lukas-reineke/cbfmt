@@ -18,9 +18,9 @@ async fn main() {
 
     let mut app =
         App::new("cbfmt")
-            .version("0.1.4")
+            .version("0.2.0")
             .author("Lukas Reineke <lukas@reineke.jp>")
-            .about("A tool to format codeblocks inside markdown and org documents.\nIt iterates over all codeblocks, and formats them with the tool(s) specified for the language of the block.")
+            .about("A tool to format codeblocks inside markdown, org, and restructuredtext documents.\nIt iterates over all codeblocks, and formats them with the tool(s) specified for the language of the block.")
             .arg(
                 Arg::with_name("config")
                     .long("config")
@@ -58,7 +58,7 @@ async fn main() {
                 Arg::with_name("parser")
                     .short('p')
                     .long("parser")
-                    .value_name("markdown|org")
+                    .value_name("markdown|org|restructuredtext")
                     .help("Sets the parser to use.")
                     .takes_value(true),
             )

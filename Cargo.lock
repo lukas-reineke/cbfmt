@@ -45,7 +45,7 @@ dependencies = [
 
 [[package]]
 name = "cbfmt"
-version = "0.1.4"
+version = "0.2.0"
 dependencies = [
  "atty",
  "cc",
@@ -532,8 +532,9 @@ dependencies = [
 
 [[package]]
 name = "tree-sitter-rst"
-version = "0.0.1"
-source = "git+https://github.com/zegervdv/tree-sitter-rst?branch=rust-lib-upstep#462ef5c2d21025de0347d9fc08aeefb11e8f0903"
+version = "0.1.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "60c2a196e53197c388b9c06400156dcb89bf5da6ad9c9036aca2ba4d667d71bb"
 dependencies = [
  "cc",
  "tree-sitter",
