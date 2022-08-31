@@ -6,6 +6,7 @@ use std::char;
 use std::fmt;
 use std::io::{self, prelude::*, Error, ErrorKind, Write};
 use std::process::{Command, Stdio};
+use textwrap::dedent;
 
 #[derive(thiserror::Error, Debug)]
 pub struct FormatError {
@@ -160,9 +161,17 @@ async fn run(
             end: 0,
             input_hash: 0,
         };
+
         for capture in each_match.captures.iter() {
-            let range = capture.node.range();
+            let mut range = capture.node.range();
+
+            for predicate in query.general_predicates(each_match.pattern_index) {
+                range = tree::handle_directive(&predicate.operator, &range, &predicate.args)
+                    .unwrap_or(range);
+            }
+
             let capture_name = &query.capture_names()[capture.index as usize];
+
             if capture_name == "language" {
                 ctx.language = String::from(&src[range.start_byte..range.end_byte]);
             }
@@ -177,7 +186,7 @@ async fn run(
                     end_byte -= 3
                 }
 
-                content = String::from(&src[range.start_byte..end_byte]);
+                content = String::from(dedent(&src[range.start_byte..end_byte]));
             }
             if capture_name == "codeblock" {
                 ctx.codeblock_start = range.start_point.row;
@@ -222,17 +231,16 @@ async fn run(
             }
         };
 
-        let start_row = &buf[(ctx.codeblock_start as i32 + offset) as usize];
-        let whitespace = utils::get_start_whitespace(start_row);
+        let indent = utils::get_start_whitespace(&buf[(ctx.start as i32 + offset) as usize]);
 
         let mut fixed_output = String::new();
         for line in output.lines() {
-            fixed_output.push_str(&whitespace);
+            fixed_output.push_str(&indent);
             fixed_output.push_str(line);
             fixed_output.push('\n');
         }
 
-        // trim start for the hash because treesitter ignores leading whitespace
+        // trim start for the hash because treesitter ignores leading indent
         let output_hash = utils::get_hash(fixed_output.trim_start());
         if ctx.input_hash != output_hash {
             formatted = true;
