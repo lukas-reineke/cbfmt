@@ -1,3 +1,7 @@
+<p align="center">
+    <img height="400" src="https://user-images.githubusercontent.com/12900252/188409065-2149a392-e5cb-4486-8d2b-b80f9022ef4c.png" alt="cbfmt" />
+</p>
+
 # cbfmt (codeblock format)
 
 A tool to format codeblocks inside markdown, org, and restructuredtext documents.  
