@@ -3,7 +3,6 @@ name: upload
 # copied from https://github.com/rust-lang/rustfmt/blob/master/.github/workflows/upload-assets.yml
 
 on:
-  push:
   release:
     types: [created]
   workflow_dispatch:
