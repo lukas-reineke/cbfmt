@@ -15,7 +15,7 @@ doc = false
 [dependencies]
 atty = "0.2.14"
 clap = "3.2.8"
-futures = "0.3.21"
+futures = "0.3.25"
 ignore = "0.4.18"
 serde = { version = "1.0.138", features = ["derive"] }
 termcolor = "1.1.3"
